@@ -17,6 +17,9 @@
 package com.example.android.contactmanager;
 
 import android.app.Activity;
+import com.kinvey.android.Client;
+import com.kinvey.android.callback.KinveyPingCallback;
+
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -30,6 +33,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 public final class ContactManager extends Activity
 {
@@ -38,6 +42,9 @@ public final class ContactManager extends Activity
 
     private Button mAddAccountButton;
     private ListView mContactList;
+    
+    // Initialize the Kinvey client
+    private Client mKinveyClient;
 
     /**
      * Called when the activity is first created. Responsible for initializing the UI.
@@ -48,11 +55,29 @@ public final class ContactManager extends Activity
         Log.v(TAG, "Activity State: onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contact_manager);
-
+        
         // Obtain handles to UI objects
         mAddAccountButton = (Button) findViewById(R.id.addContactButton);
         mContactList = (ListView) findViewById(R.id.contactList);
-
+        
+        // Instantiate the Kinvey client
+        mKinveyClient = new Client.Builder(this.getApplicationContext()).build();
+        		
+        // Test the Kinvey client's connection
+        mKinveyClient.ping(new KinveyPingCallback() {
+            public void onFailure(Throwable t) {
+                Log.e(TAG, "Kinvey Ping Failed", t);
+                Toast.makeText(ContactManager.this,
+                		"Kinvey Ping Failed",
+                		Toast.LENGTH_SHORT).show();
+            }
+            public void onSuccess(Boolean b) {
+                Log.d(TAG, "Kinvey Ping Success");
+                Toast.makeText(ContactManager.this,
+                		"Kinvey Ping Success",
+                		Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Register handler for UI elements
         mAddAccountButton.setOnClickListener(new View.OnClickListener() {

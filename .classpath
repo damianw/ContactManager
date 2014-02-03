@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="lib" path="/Users/damian/Development/ContactManager/libs/google-http-client-1.16.0-rc.jar"/>
+	<classpathentry kind="lib" path="/Users/damian/Development/ContactManager/libs/google-http-client-android-1.16.0-rc.jar"/>
+	<classpathentry kind="lib" path="/Users/damian/Development/ContactManager/libs/google-http-client-gson-1.16.0-rc.jar"/>
+	<classpathentry kind="lib" path="/Users/damian/Development/ContactManager/libs/gson-2.1.jar"/>
+	<classpathentry kind="lib" path="/Users/damian/Development/ContactManager/libs/guava-14.0.1.jar"/>
+	<classpathentry kind="lib" path="/Users/damian/Development/ContactManager/libs/kinvey-android-lib-2.6.13.jar"/>
+	<classpathentry kind="lib" path="/Users/damian/Development/ContactManager/libs/kinvey-java-2.6.13.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
