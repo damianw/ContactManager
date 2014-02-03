@@ -192,7 +192,8 @@ public final class ContactAdder extends Activity implements OnAccountsUpdateList
         entity.set("email", email);
         entity.set("phoneType", phoneType);
         entity.set("emailType", emailType);
-        // TODO: add the owner's information to the entity
+        // TODO: make sure this doesn't NPE!
+        entity.set("ownerUser", mSelectedAccount.getName());
         AsyncAppData<ContactEntity> mycontacts = mApp.getClient().appData("contacts",ContactEntity.class);
         mycontacts.save(entity, new KinveyClientCallback<ContactEntity>() {
         	  @Override

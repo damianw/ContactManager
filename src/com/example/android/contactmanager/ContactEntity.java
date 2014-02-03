@@ -18,9 +18,7 @@ public class ContactEntity extends GenericJson {
     @Key
     private String email;
     @Key
-    private String owner_email;
-    @Key 
-    private String owner_username;
+    private String ownerUser;
     @Key("_kmd")
     private KinveyMetaData meta; // Kinvey metadata, OPTIONAL
     @Key("_acl")
