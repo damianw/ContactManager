@@ -16,8 +16,13 @@
 
 package com.example.android.contactmanager;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
+
+import com.kinvey.android.AsyncAppData;
 import com.kinvey.android.Client;
+import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
 
 import android.content.Intent;
@@ -27,6 +32,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -95,34 +101,25 @@ public final class ContactManager extends Activity
      */
     private void populateContactList() {
         // Build adapter with contact entries
-        Cursor cursor = getContacts();
-        String[] fields = new String[] {
-                ContactsContract.Data.DISPLAY_NAME
-        };
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.contact_entry, cursor,
-                fields, new int[] {R.id.contactEntryText});
-        mContactList.setAdapter(adapter);
+    	AsyncAppData<ContactEntity> myevents = mApp.getClient().appData("contacts", ContactEntity.class);
+    	myevents.get(new KinveyListCallback<ContactEntity>()     {
+    	  @Override
+    	  public void onSuccess(ContactEntity[] result) { 
+    	    Log.v(TAG, "received "+ result.length + " events");
+    	    ArrayList<String> names = new ArrayList<String>();
+    	    for (ContactEntity entity : result) {
+    	    	names.add((String)entity.get("name"));
+    	    }
+    	    ArrayAdapter adapter = new ArrayAdapter(ContactManager.this,  android.R.layout.simple_list_item_1, names.toArray());
+    	    mContactList.setAdapter(adapter);
+    	  }
+    	  @Override
+    	  public void onFailure(Throwable error)  { 
+    	    Log.e(TAG, "failed to fetch all", error);
+    	  }
+    	});
     }
 
-    /**
-     * Obtains the contact list for the currently selected account.
-     *
-     * @return A cursor for for accessing the contact list.
-     */
-    private Cursor getContacts()
-    {
-        // Run query
-        Uri uri = ContactsContract.Contacts.CONTENT_URI;
-        String[] projection = new String[] {
-                ContactsContract.Contacts._ID,
-                ContactsContract.Contacts.DISPLAY_NAME
-        };
-        String selection = ContactsContract.Contacts.IN_VISIBLE_GROUP + " = '1'";
-        String[] selectionArgs = null;
-        String sortOrder = ContactsContract.Contacts.DISPLAY_NAME + " COLLATE LOCALIZED ASC";
-
-        return managedQuery(uri, projection, selection, selectionArgs, sortOrder);
-    }
 
     /**
      * Launches the ContactAdder activity to add a new contact to the selected accont.

@@ -15,16 +15,18 @@ public class ContactManagerApp extends Application {
     	super.onCreate();
     	// Instantiate the Kinvey client
         mKinveyClient = new Client.Builder(this.getApplicationContext()).build();
-        mKinveyClient.user().login(new KinveyUserCallback() {
-            @Override
-            public void onFailure(Throwable error) {
-                Log.e("LOGIN", "Login Failure", error);
-            }
-            @Override
-            public void onSuccess(User result) {
-                Log.i("LOGIN","Logged in a new implicit user with id: " + result.getId());
-            }
-        });
+        if (!mKinveyClient.user().isUserLoggedIn()) {
+	        mKinveyClient.user().login(new KinveyUserCallback() {
+	            @Override
+	            public void onFailure(Throwable error) {
+	                Log.e("LOGIN", "Login Failure", error);
+	            }
+	            @Override
+	            public void onSuccess(User result) {
+	                Log.i("LOGIN","Logged in a new implicit user with id: " + result.getId());
+	            }
+	        });
+        }
     }
     
     public Client getClient() {
