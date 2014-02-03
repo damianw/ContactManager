@@ -43,8 +43,7 @@ public final class ContactManager extends Activity
     private Button mAddAccountButton;
     private ListView mContactList;
     
-    // Initialize the Kinvey client
-    private Client mKinveyClient;
+    private ContactManagerApp mApp;
 
     /**
      * Called when the activity is first created. Responsible for initializing the UI.
@@ -60,11 +59,11 @@ public final class ContactManager extends Activity
         mAddAccountButton = (Button) findViewById(R.id.addContactButton);
         mContactList = (ListView) findViewById(R.id.contactList);
         
-        // Instantiate the Kinvey client
-        mKinveyClient = new Client.Builder(this.getApplicationContext()).build();
-        		
+        // Grab the application
+        mApp = (ContactManagerApp) getApplication();
+        
         // Test the Kinvey client's connection
-        mKinveyClient.ping(new KinveyPingCallback() {
+        mApp.getClient().ping(new KinveyPingCallback() {
             public void onFailure(Throwable t) {
                 Log.e(TAG, "Kinvey Ping Failed", t);
                 Toast.makeText(ContactManager.this,

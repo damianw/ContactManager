@@ -44,6 +44,9 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import com.kinvey.android.AsyncAppData;
+import com.kinvey.java.core.KinveyClientCallback;
+
 public final class ContactAdder extends Activity implements OnAccountsUpdateListener
 {
     public static final String TAG = "ContactsAdder";
@@ -64,6 +67,8 @@ public final class ContactAdder extends Activity implements OnAccountsUpdateList
     private Spinner mContactPhoneTypeSpinner;
     private Button mContactSaveButton;
     private AccountData mSelectedAccount;
+    
+    private ContactManagerApp mApp;
 
     /**
      * Called when the activity is first created. Responsible for initializing the UI.
@@ -74,6 +79,9 @@ public final class ContactAdder extends Activity implements OnAccountsUpdateList
         Log.v(TAG, "Activity State: onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contact_adder);
+        
+        // Grab the application
+        mApp = (ContactManagerApp) getApplication();
 
         // Obtain handles to UI objects
         mAccountSpinner = (Spinner) findViewById(R.id.accountSpinner);
@@ -177,54 +185,27 @@ public final class ContactAdder extends Activity implements OnAccountsUpdateList
         int emailType = mContactEmailTypes.get(
                 mContactEmailTypeSpinner.getSelectedItemPosition());;
 
-        // Prepare contact creation request
-        //
-        // Note: We use RawContacts because this data must be associated with a particular account.
-        //       The system will aggregate this with any other data for this contact and create a
-        //       coresponding entry in the ContactsContract.Contacts provider for us.
-        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-        ops.add(ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
-                .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, mSelectedAccount.getType())
-                .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, mSelectedAccount.getName())
-                .build());
-        ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                .withValue(ContactsContract.Data.MIMETYPE,
-                        ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
-                .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name)
-                .build());
-        ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                .withValue(ContactsContract.Data.MIMETYPE,
-                        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
-                .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone)
-                .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, phoneType)
-                .build());
-        ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                .withValue(ContactsContract.Data.MIMETYPE,
-                        ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
-                .withValue(ContactsContract.CommonDataKinds.Email.DATA, email)
-                .withValue(ContactsContract.CommonDataKinds.Email.TYPE, emailType)
-                .build());
-
-        // Ask the Contact provider to create a new contact
-        Log.i(TAG,"Selected account: " + mSelectedAccount.getName() + " (" +
-                mSelectedAccount.getType() + ")");
-        Log.i(TAG,"Creating contact: " + name);
-        try {
-            getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
-        } catch (Exception e) {
-            // Display warning
-            Context ctx = getApplicationContext();
-            CharSequence txt = getString(R.string.contactCreationFailure);
-            int duration = Toast.LENGTH_SHORT;
-            Toast toast = Toast.makeText(ctx, txt, duration);
-            toast.show();
-
-            // Log exception
-            Log.e(TAG, "Exceptoin encoutered while inserting contact: " + e);
-        }
+        // Create contact on Kinvey
+        ContactEntity entity = new ContactEntity();
+        entity.set("name", name);
+        entity.set("phone", phone);
+        entity.set("email", email);
+        entity.set("phoneType", phoneType);
+        entity.set("emailType", emailType);
+        // TODO: add the owner's information to the entity
+        AsyncAppData<ContactEntity> mycontacts = mApp.getClient().appData("contactsCollection",ContactEntity.class);
+        mycontacts.save(entity, new KinveyClientCallback<ContactEntity>() {
+        	  @Override
+        	  public void onFailure(Throwable e) {
+        	      Log.e(TAG, "failed to save event data", e);
+        	      Toast.makeText(ContactAdder.this, "failed to save event data", Toast.LENGTH_SHORT).show();
+        	  }
+        	  @Override
+        	  public void onSuccess(ContactEntity r) {
+        	      Log.d(TAG, "saved data for entity "+ r.get("name")); 
+        	      Toast.makeText(ContactAdder.this, "saved data for entity "+ r.get("name"), Toast.LENGTH_SHORT).show();
+        	  }
+        	});
     }
 
     /**

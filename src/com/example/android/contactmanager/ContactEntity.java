@@ -12,9 +12,9 @@ public class ContactEntity extends GenericJson {
     @Key
     private String phone;
     @Key
-    private String phone_type;
+    private int phoneType;
     @Key
-    private String email_type;
+    private int emailType;
     @Key
     private String email;
     @Key
