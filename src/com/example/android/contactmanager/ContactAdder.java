@@ -192,8 +192,15 @@ public final class ContactAdder extends Activity implements OnAccountsUpdateList
         entity.set("email", email);
         entity.set("phoneType", phoneType);
         entity.set("emailType", emailType);
-        // TODO: make sure this doesn't NPE!
         entity.set("ownerUser", mSelectedAccount.getName());
+        if (mSelectedAccount == null) {
+        	// Something went wrong with selecting an account?
+        	// Not sure if this really needs to be handled, since
+        	// 	it wasn't handled in the original code...
+        	// Just alert the user that they need to select an account
+        	Toast.makeText(this, "Please select an account!", Toast.LENGTH_SHORT).show();
+        	return;
+        }
         AsyncAppData<ContactEntity> mycontacts = mApp.getClient().appData("contacts",ContactEntity.class);
         mycontacts.save(entity, new KinveyClientCallback<ContactEntity>() {
         	  @Override
@@ -272,7 +279,7 @@ public final class ContactAdder extends Activity implements OnAccountsUpdateList
     }
 
     /**
-     * A container class used to repreresent all known information about an account.
+     * A container class used to represent all known information about an account.
      */
     private class AccountData {
         private String mName;

@@ -24,6 +24,7 @@ import com.kinvey.android.AsyncAppData;
 import com.kinvey.android.Client;
 import com.kinvey.android.callback.KinveyListCallback;
 import com.kinvey.android.callback.KinveyPingCallback;
+import com.kinvey.java.Query;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -91,8 +92,14 @@ public final class ContactManager extends Activity
                 launchContactAdder();
             }
         });
-
-        // Populate the contact list
+    }
+    
+    @Override
+    public void onResume() {
+    	super.onResume();
+    	// Populate the contact list
+    	// Better to do this here instead of onCreate, since then
+    	// it will actually refresh after adding on new one
         populateContactList();
     }
 
@@ -101,8 +108,13 @@ public final class ContactManager extends Activity
      */
     private void populateContactList() {
         // Build adapter with contact entries
+    	// Get a query and only grab this users contacts
+    	Query query = mApp.getClient().query();
+    	query.equals("_acl.creator",mApp.getClient().user().getId());
+    	
+    	// Make the actual query
     	AsyncAppData<ContactEntity> myevents = mApp.getClient().appData("contacts", ContactEntity.class);
-    	myevents.get(new KinveyListCallback<ContactEntity>()     {
+    	myevents.get(query, new KinveyListCallback<ContactEntity>()     {
     	  @Override
     	  public void onSuccess(ContactEntity[] result) { 
     	    Log.v(TAG, "received "+ result.length + " events");
@@ -110,6 +122,7 @@ public final class ContactManager extends Activity
     	    for (ContactEntity entity : result) {
     	    	names.add((String)entity.get("name"));
     	    }
+    	    // Make a simple adapter to list the names of all the results
     	    ArrayAdapter adapter = new ArrayAdapter(ContactManager.this,  android.R.layout.simple_list_item_1, names.toArray());
     	    mContactList.setAdapter(adapter);
     	  }

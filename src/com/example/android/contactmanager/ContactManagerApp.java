@@ -15,6 +15,8 @@ public class ContactManagerApp extends Application {
     	super.onCreate();
     	// Instantiate the Kinvey client
         mKinveyClient = new Client.Builder(this.getApplicationContext()).build();
+        
+        // Log the user in if they are not already logged in
         if (!mKinveyClient.user().isUserLoggedIn()) {
 	        mKinveyClient.user().login(new KinveyUserCallback() {
 	            @Override
